@@ -884,7 +884,7 @@ namespace System.Data.SQLite
 			}
 
 			SQLiteDataAdapter adapter = new SQLiteDataAdapter(cmd);
-			DataTable dt = new DataTable();
+			DataTable dt = new DataTable("Table");
 			adapter.Fill(dt);
 
 			return dt;
