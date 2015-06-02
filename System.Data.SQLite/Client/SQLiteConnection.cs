@@ -897,7 +897,7 @@ namespace System.Data.SQLite
 		/// <param name="databaseFileName">The file to create</param>
 		static public void CreateFile(string databaseFileName)
 		{
-			FileStream fs = File.Create(databaseFileName);
+			Stream fs = StreamHandler.Instance.Create(databaseFileName);
 			fs.Close();
 		}
 		#endregion

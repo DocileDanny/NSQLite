@@ -131,7 +131,7 @@ BOOL bExclusive;    /* Indicates an exclusive lock has been obtained */
 		public partial class sqlite3_file
 		{
 			public sqlite3_vfs pVfs;       /* The VFS used to open this file */
-			public FileStream fs;          /* Filestream access to this file*/
+			public Stream fs;          /* Filestream access to this file*/
 			// public HANDLE h;            /* Handle for accessing the file */
 			public int locktype;           /* Type of lock currently held on this file */
 			public int sharedLockByte;     /* Randomly chosen byte used as a shared lock */
@@ -1868,7 +1868,7 @@ shmpage_out:
 				zRandom.Append((char)zChars[(int)(iRandom % (zChars.Length - 1))]);
 			}
 			//  zBuf[j] = 0;
-			zBuf.Append(Path.GetTempPath() + SQLITE_TEMP_FILE_PREFIX + zRandom.ToString());
+			zBuf.Append(StreamHandler.Instance.GetTempPath() + SQLITE_TEMP_FILE_PREFIX + zRandom.ToString());
 			//for(i=sqlite3Strlen30(zTempPath); i>0 && zTempPath[i-1]=='\\'; i--){}
 			//zTempPath[i] = 0;
 			//sqlite3_snprintf(nBuf-17, zBuf,
@@ -1898,7 +1898,7 @@ shmpage_out:
 		)
 		{
 			//HANDLE h;
-			FileStream fs = null;
+			Stream fs = null;
 			FileAccess dwDesiredAccess;
 			FileShare dwShareMode;
 			FileMode dwCreationDisposition;
@@ -2064,7 +2064,7 @@ dwFlagsAndAttributes |= FileOptions.RandomAccess; // FILE_FLAG_RANDOM_ACCESS;
 #if (WINDOWS_PHONE)
 			fs = new IsolatedStorageFileStream(zConverted, dwCreationDisposition, dwDesiredAccess, dwShareMode, IsolatedStorageFile.GetUserStoreForApplication());
 #else
-						fs = new FileStream(zConverted, dwCreationDisposition, dwDesiredAccess, dwShareMode, 4096, dwFlagsAndAttributes);
+					fs = StreamHandler.Instance.New(zConverted, dwCreationDisposition, dwDesiredAccess, dwShareMode, 4096, dwFlagsAndAttributes);
 #endif
 
 #if SQLITE_DEBUG
@@ -2194,7 +2194,7 @@ pFile.zDeleteOnClose = zConverted;
 #if WINDOWS_PHONE
 		   if ( !System.IO.IsolatedStorage.IsolatedStorageFile.GetUserStoreForApplication().FileExists( zFilename ) )
 #else
-					if (!File.Exists(zFilename))
+					if (!StreamHandler.Instance.Exists(zFilename))
 #endif
 					{
 						rc = SQLITE_IOERR;
@@ -2205,7 +2205,7 @@ pFile.zDeleteOnClose = zConverted;
 #if WINDOWS_PHONE
 			  System.IO.IsolatedStorage.IsolatedStorageFile.GetUserStoreForApplication().DeleteFile(zFilename);
 #else
-						File.Delete(zFilename);
+						StreamHandler.Instance.Delete(zFilename);
 #endif
 						rc = SQLITE_OK;
 					}
@@ -2225,14 +2225,14 @@ pFile.zDeleteOnClose = zConverted;
 			{
 				do
 				{
-					if (!File.Exists(zFilename))
+					if (!StreamHandler.Instance.Exists(zFilename))
 					{
 						rc = SQLITE_IOERR;
 						break;
 					}
 					try
 					{
-						File.Delete(zFilename);
+						StreamHandler.Instance.Delete(zFilename);
 						rc = SQLITE_OK;
 					}
 					catch
@@ -2288,7 +2288,7 @@ pFile.zDeleteOnClose = zConverted;
 #if WINDOWS_PHONE
 		  pResOut = System.IO.IsolatedStorage.IsolatedStorageFile.GetUserStoreForApplication().FileExists(zFilename) ? 1 : 0;
 #else
-				pResOut = File.Exists(zFilename) ? 1 : 0;
+				pResOut = StreamHandler.Instance.Exists(zFilename) ? 1 : 0;
 #endif
 				return SQLITE_OK;
 			}
@@ -2298,16 +2298,16 @@ pFile.zDeleteOnClose = zConverted;
 #if WINDOWS_PHONE || WINDOWS_MOBILE
 		if (new DirectoryInfo(zFilename).Exists)
 #else
-				attr = File.GetAttributes(zFilename);// GetFileAttributesW( (WCHAR)zConverted );
+				attr = StreamHandler.Instance.GetAttributes(zFilename);// GetFileAttributesW( (WCHAR)zConverted );
 				if (attr == FileAttributes.Directory)
 #endif
 				{
 					try
 					{
-						string name = Path.Combine(Path.GetTempPath(), Path.GetTempFileName());
-						FileStream fs = File.Create(name);
+						string name = StreamHandler.Instance.Combine(StreamHandler.Instance.GetTempPath(), StreamHandler.Instance.GetTempFileName());
+						Stream fs = StreamHandler.Instance.Create(name);
 						fs.Close();
-						File.Delete(name);
+						StreamHandler.Instance.Delete(name);
 						attr = FileAttributes.Normal;
 					}
 					catch
@@ -2387,7 +2387,7 @@ return SQLITE_OK;
 #if (WINDOWS_PHONE)
 		zOut = zRelative;
 #else
-				zOut = Path.GetFullPath(zRelative); // was unicodeToUtf8(zTemp);
+				zOut = StreamHandler.Instance.GetFullPath(zRelative); // was unicodeToUtf8(zTemp);
 #endif
 				// will happen on exit; was   free(zTemp);
 				/* isNT() is 1 if SQLITE_OS_WINCE==1, so this else is never executed.
@@ -2751,7 +2751,7 @@ Debug.Assert(winSysInfo.dwAllocationGranularity > 0);
 			public virtual void LockFile(sqlite3_file pFile, long offset, long length)
 			{
 #if !(WINDOWS_MOBILE)
-				pFile.fs.Lock(offset, length);
+				StreamHandler.Instance.Lock(pFile.fs, offset, length);
 #endif
 			}
 
@@ -2763,7 +2763,7 @@ Debug.Assert(winSysInfo.dwAllocationGranularity > 0);
 			public virtual void UnlockFile(sqlite3_file pFile, long offset, long length)
 			{
 #if !(WINDOWS_MOBILE)
-				pFile.fs.Unlock(offset, length);
+				StreamHandler.Instance.Unlock(pFile.fs, offset, length);
 #endif
 			}
 		}
@@ -2781,7 +2781,7 @@ Debug.Assert(winSysInfo.dwAllocationGranularity > 0);
 				Debug.Assert(offset == SHARED_FIRST);
 				try
 				{
-					pFile.fs.Lock(offset + pFile.sharedLockByte, 1);
+					StreamHandler.Instance.Lock(pFile.fs, offset + pFile.sharedLockByte, 1);
 				}
 				catch (IOException)
 				{

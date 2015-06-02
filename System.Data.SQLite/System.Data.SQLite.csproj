@@ -137,6 +137,7 @@
     <Compile Include="Client\SQLiteRowUpdatingEventHandler.cs" />
     <Compile Include="Client\SQLiteTransaction.cs" />
     <Compile Include="Client\SQLiteConvert.cs" />
+    <Compile Include="src\StreamHandler.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System.Core" />

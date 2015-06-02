@@ -3153,7 +3153,7 @@ error_out:
 #if (WINDOWS_MOBILE)
 			  pArg = (long)-1; // not supported
 #else
-						pArg = (long)fd.fs.Handle;
+					pArg = (long)StreamHandler.Instance.GetHandle(fd.fs);
 #endif
 						rc = SQLITE_OK;
 					}
