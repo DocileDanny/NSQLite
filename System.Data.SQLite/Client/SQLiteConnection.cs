@@ -228,9 +228,8 @@ namespace System.Data.SQLite
 							}
 							else if(tvalue_lc.StartsWith("|DataDirectory|", StringComparison.InvariantCultureIgnoreCase))
 							{
-								AppDomainSetup ads = AppDomain.CurrentDomain.SetupInformation;
 								string filePath = String.Format("App_Data{0}{1}", Path.DirectorySeparatorChar, tvalue_lc.Substring(15));
-								db_file = Path.Combine(ads.ApplicationBase, filePath);
+								db_file = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, filePath);
 #endif
 							}
 							else

@@ -49,6 +49,8 @@ UpgradeLog.htm
 *.ReSharper
 *.userprefs
 
+.vs
+
 # http://www.gnu.org/software/automake
 
 Makefile
